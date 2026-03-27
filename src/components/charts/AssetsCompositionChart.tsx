@@ -10,35 +10,55 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 import { useFinancialStore } from '../../store/useFinancialStore';
-import { formatCurrency, formatCompactCurrency } from '../../utils/formatters';
+import { formatCurrency } from '../../utils/formatters';
 import { ChartWrapper } from './ChartWrapper';
+
+const COLORS = ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#06b6d4', '#f97316'];
 
 export const AssetsCompositionChart: React.FC = () => {
   const { companies, selectedCompanyIds, dataset } = useFinancialStore();
   const currency = dataset?.currency ?? 'T RON';
 
-  const primaryCompany = useMemo(
-    () => companies.find((c) => c.id === selectedCompanyIds[0]) ?? null,
+  const selectedCompanies = useMemo(
+    () => companies.filter((c) => selectedCompanyIds.includes(c.id)),
     [companies, selectedCompanyIds]
   );
 
+  const isMultiCompany = selectedCompanies.length > 1;
+
   const chartData = useMemo(() => {
-    if (!primaryCompany) return [];
+    if (selectedCompanies.length === 0) return [];
 
-    return primaryCompany.annuals
-      .slice()
-      .sort((a, b) => a.year - b.year)
-      .map((annual) => ({
-        year: annual.year.toString(),
-        fixedAssets: annual.fixedAssets ?? null,
-        stocks: annual.stocks ?? null,
-        receivables: annual.receivables ?? null,
-        cash: annual.cashAndEquivalents ?? null,
-      }))
-      .filter((d) => d.fixedAssets !== null || d.stocks !== null || d.receivables !== null || d.cash !== null);
-  }, [primaryCompany]);
+    const allYears = new Set<number>();
+    selectedCompanies.forEach((c) => c.annuals.forEach((a) => allYears.add(a.year)));
+    const years = Array.from(allYears).sort();
 
-  if (!primaryCompany || chartData.length === 0) return null;
+    return years.map((year) => {
+      const point: Record<string, unknown> = { year: year.toString() };
+
+      if (isMultiCompany) {
+        selectedCompanies.forEach((company) => {
+          const annual = company.annuals.find((a) => a.year === year);
+          const total =
+            (annual?.fixedAssets ?? 0) +
+            (annual?.stocks ?? 0) +
+            (annual?.receivables ?? 0) +
+            (annual?.cashAndEquivalents ?? 0);
+          point[`totalAssets_${company.id}`] = total > 0 ? total : null;
+        });
+      } else {
+        const annual = selectedCompanies[0].annuals.find((a) => a.year === year);
+        point.fixedAssets = annual?.fixedAssets ?? null;
+        point.stocks = annual?.stocks ?? null;
+        point.receivables = annual?.receivables ?? null;
+        point.cash = annual?.cashAndEquivalents ?? null;
+      }
+
+      return point;
+    });
+  }, [selectedCompanies, isMultiCompany]);
+
+  if (selectedCompanies.length === 0 || chartData.length === 0) return null;
 
   const formatYAxis = (value: number) => {
     if (Math.abs(value) >= 1_000_000) return `${(value / 1_000_000).toFixed(1)}M`;
@@ -69,10 +89,24 @@ export const AssetsCompositionChart: React.FC = () => {
           <YAxis tickFormatter={formatYAxis} tick={{ fontSize: 11 }} />
           <Tooltip content={<CustomTooltip />} />
           <Legend wrapperStyle={{ fontSize: 12 }} />
-          <Bar dataKey="fixedAssets" name="Fixed Assets" stackId="assets" fill="#3b82f6" />
-          <Bar dataKey="stocks" name="Stocks" stackId="assets" fill="#10b981" />
-          <Bar dataKey="receivables" name="Receivables" stackId="assets" fill="#f59e0b" />
-          <Bar dataKey="cash" name="Cash" stackId="assets" fill="#06b6d4" radius={[2, 2, 0, 0]} />
+          {isMultiCompany ? (
+            selectedCompanies.map((company, idx) => (
+              <Bar
+                key={company.id}
+                dataKey={`totalAssets_${company.id}`}
+                name={company.name}
+                fill={COLORS[idx % COLORS.length]}
+                radius={[2, 2, 0, 0]}
+              />
+            ))
+          ) : (
+            <>
+              <Bar dataKey="fixedAssets" name="Fixed Assets" stackId="assets" fill="#3b82f6" />
+              <Bar dataKey="stocks" name="Stocks" stackId="assets" fill="#10b981" />
+              <Bar dataKey="receivables" name="Receivables" stackId="assets" fill="#f59e0b" />
+              <Bar dataKey="cash" name="Cash" stackId="assets" fill="#06b6d4" radius={[2, 2, 0, 0]} />
+            </>
+          )}
         </BarChart>
       </ResponsiveContainer>
     </ChartWrapper>
