@@ -44,44 +44,38 @@ export default function PeerComparisonTable() {
   const [sorting, setSorting] = useState<SortingState>([]);
 
   const currency = dataset?.currency ?? 'T RON';
+  const availableYears = dataset?.years ?? [];
+  const [selectedYear, setSelectedYear] = useState<number | null>(null);
+  const activeYear = selectedYear ?? (availableYears.length > 0 ? availableYears[availableYears.length - 1] : null);
 
   const data = useMemo<PeerRow[]>(() => {
-    if (!companies.length) return [];
+    if (!companies.length || activeYear === null) return [];
 
     return companies.map((company) => {
-      const latestYear =
-        company.annuals.length > 0
-          ? company.annuals.reduce((a, b) => (a.year > b.year ? a : b))
-          : null;
-      const latestRatios =
-        company.ratios.length > 0
-          ? company.ratios.reduce((a, b) => (a.year > b.year ? a : b))
-          : null;
-      const latestGrowth =
-        company.growth.length > 0
-          ? company.growth.reduce((a, b) => (a.year > b.year ? a : b))
-          : null;
+      const yearData = company.annuals.find((a) => a.year === activeYear) ?? null;
+      const yearRatios = company.ratios.find((r) => r.year === activeYear) ?? null;
+      const yearGrowth = company.growth.find((g) => g.year === activeYear) ?? null;
 
       return {
         id: company.id,
         name: company.name,
         isReference: company.isReferenceCompany,
         isSelected: selectedCompanyIds.includes(company.id),
-        revenue: latestYear?.turnover ?? null,
-        netProfit: latestYear?.netProfit ?? null,
-        totalAssets: latestYear?.totalAssets ?? null,
-        ownCapital: latestYear?.ownCapital ?? null,
-        employees: latestYear?.employeeCount ?? null,
-        roe: latestRatios?.roe ?? null,
-        roa: latestRatios?.roa ?? null,
-        operatingMargin: latestRatios?.operatingMargin ?? null,
-        netMargin: latestRatios?.netMargin ?? null,
-        debtToEquity: latestRatios?.debtToEquity ?? null,
-        currentRatio: latestRatios?.currentRatio ?? null,
-        revenueGrowth: latestGrowth?.revenueGrowth ?? null,
+        revenue: yearData?.turnover ?? null,
+        netProfit: yearData?.netProfit ?? null,
+        totalAssets: yearData?.totalAssets ?? null,
+        ownCapital: yearData?.ownCapital ?? null,
+        employees: yearData?.employeeCount ?? null,
+        roe: yearRatios?.roe ?? null,
+        roa: yearRatios?.roa ?? null,
+        operatingMargin: yearRatios?.operatingMargin ?? null,
+        netMargin: yearRatios?.netMargin ?? null,
+        debtToEquity: yearRatios?.debtToEquity ?? null,
+        currentRatio: yearRatios?.currentRatio ?? null,
+        revenueGrowth: yearGrowth?.revenueGrowth ?? null,
       };
     });
-  }, [companies, selectedCompanyIds]);
+  }, [companies, selectedCompanyIds, activeYear]);
 
   const columns = useMemo(
     () => [
@@ -230,6 +224,26 @@ export default function PeerComparisonTable() {
 
   return (
     <div className="w-full rounded-lg border border-gray-200 bg-white shadow-sm">
+      {availableYears.length > 1 && (
+        <div className="flex items-center gap-2 border-b border-gray-200 px-4 py-3">
+          <span className="text-sm font-medium text-gray-600">Year:</span>
+          <div className="flex gap-1">
+            {availableYears.map((year) => (
+              <button
+                key={year}
+                onClick={() => setSelectedYear(year)}
+                className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
+                  year === activeYear
+                    ? 'bg-blue-600 text-white shadow-sm'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                {year}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
       <div className="overflow-x-auto">
         <table className="w-full border-collapse text-sm">
           <thead>
