@@ -1,4 +1,5 @@
 import CompanyHeader from './CompanyHeader';
+import FinancialScorePanel from './FinancialScorePanel';
 import FinancialStrength from './FinancialStrength';
 import ProfitabilityPanel from './ProfitabilityPanel';
 import GrowthPanel from './GrowthPanel';
@@ -21,6 +22,8 @@ const DashboardView = () => {
   return (
     <div className="space-y-6">
       <CompanyHeader />
+
+      <FinancialScorePanel />
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <FinancialStrength />

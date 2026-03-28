@@ -81,6 +81,28 @@ export type RatioThreshold = {
   direction: 'higher-better' | 'lower-better';
 };
 
+export interface FinancialScoreSubScore {
+  name: string;
+  value: number | null;
+  score: number | null;
+}
+
+export interface FinancialScoreDimension {
+  name: string;
+  score: number | null;
+  maxScore: 10;
+  weight: number;
+  subScores: FinancialScoreSubScore[];
+}
+
+export interface FinancialScoreResult {
+  overall: number | null;
+  dimensions: FinancialScoreDimension[];
+  companyId: string;
+  companyName: string;
+  year: number;
+}
+
 export const RATIO_THRESHOLDS: Record<string, RatioThreshold> = {
   operatingMargin: { good: 10, moderate: 5, direction: 'higher-better' },
   netMargin: { good: 8, moderate: 3, direction: 'higher-better' },
