@@ -25,6 +25,11 @@ export function createEmptyAnnual(year: number): AnnualFinancials {
     totalDebts: null,
     shortTermDebts: null,
     longTermDebts: null,
+    // Sub-items
+    tradeReceivables: null,
+    tradePayables: null,
+    creditInstitutionsShortTerm: null,
+    creditInstitutionsLongTerm: null,
     // Other
     employeeCount: null,
     depreciation: null,

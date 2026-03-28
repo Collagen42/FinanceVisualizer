@@ -346,7 +346,8 @@ function findClosestColumn(x: number, columnPositions: number[]): number {
  */
 function extractDataFromRows(
   rows: Array<{ y: number; items: TextItem[] }>,
-  columnPositions: number[]
+  columnPositions: number[],
+  pageType: PageType = 'unknown'
 ): ExtractedValue[] {
   const results: ExtractedValue[] = [];
 
@@ -363,7 +364,7 @@ function extractDataFromRows(
     if (labelItems.length === 0 || dataItems.length === 0) continue;
 
     const labelText = labelItems.map((i) => i.str).join(' ').trim();
-    const fieldName = matchLabel(labelText);
+    const fieldName = matchLabel(labelText, pageType);
 
     if (!fieldName) continue;
 
@@ -422,6 +423,10 @@ function createBlankAnnual(year: number): AnnualFinancials {
     totalDebts: null,
     shortTermDebts: null,
     longTermDebts: null,
+    tradeReceivables: null,
+    tradePayables: null,
+    creditInstitutionsShortTerm: null,
+    creditInstitutionsLongTerm: null,
     employeeCount: null,
     depreciation: null,
   };
@@ -594,8 +599,8 @@ export async function parsePDF(
       continue;
     }
 
-    // Extract data values
-    const values = extractDataFromRows(rows, columnPositions);
+    // Extract data values (pass pageType for section-aware label matching)
+    const values = extractDataFromRows(rows, columnPositions, pageType);
 
     // Accumulate values into the company data structure
     for (const val of values) {
@@ -607,6 +612,15 @@ export async function parsePDF(
       }
       if (!accumulator[companyName][val.year]) {
         accumulator[companyName][val.year] = {};
+      }
+
+      // Fields where the first (short-term/D-section) occurrence is correct —
+      // "4. Trade payables" appears in both D and G sections; keep the first value.
+      const KEEP_FIRST_VALUE = new Set(['tradePayables']);
+
+      if (KEEP_FIRST_VALUE.has(val.fieldName) && accumulator[companyName][val.year][val.fieldName] != null) {
+        // Already have a value for this field — don't overwrite
+        continue;
       }
 
       // Store the value (later values on the same field overwrite earlier ones,

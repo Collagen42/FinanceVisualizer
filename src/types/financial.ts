@@ -17,6 +17,11 @@ export interface AnnualFinancials {
   totalDebts: number | null;
   shortTermDebts: number | null;
   longTermDebts: number | null;
+  // Sub-items for competitor analysis
+  tradeReceivables: number | null;
+  tradePayables: number | null;
+  creditInstitutionsShortTerm: number | null;
+  creditInstitutionsLongTerm: number | null;
   // Other
   employeeCount: number | null;
   depreciation: number | null;
