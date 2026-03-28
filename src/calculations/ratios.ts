@@ -78,6 +78,9 @@ export function calculateRatios(annual: AnnualFinancials): FinancialRatios {
   const revenuePerEmployee = safeDivide(turnover, employeeCount);
   const profitPerEmployee = safeDivide(netProfit, employeeCount);
 
+  // DuPont decomposition
+  const equityMultiplier = safeDivide(totalAssets, ownCapital);
+
   return {
     year: annual.year,
     grossMargin,
@@ -96,5 +99,6 @@ export function calculateRatios(annual: AnnualFinancials): FinancialRatios {
     assetTurnover,
     revenuePerEmployee,
     profitPerEmployee,
+    equityMultiplier,
   };
 }

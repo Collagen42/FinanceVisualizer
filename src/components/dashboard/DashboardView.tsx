@@ -2,8 +2,10 @@ import CompanyHeader from './CompanyHeader';
 import FinancialStrength from './FinancialStrength';
 import ProfitabilityPanel from './ProfitabilityPanel';
 import GrowthPanel from './GrowthPanel';
+import DuPontPanel from './DuPontPanel';
 import { RevenueProfitChart } from '../charts/RevenueProfitChart';
 import { MarginTrendChart } from '../charts/MarginTrendChart';
+import { WaterfallChart } from '../charts/WaterfallChart';
 import { AssetsCompositionChart } from '../charts/AssetsCompositionChart';
 import { LiabilitiesEquityChart } from '../charts/LiabilitiesEquityChart';
 import { BalanceSheetEvolution } from '../charts/BalanceSheetEvolution';
@@ -31,6 +33,7 @@ const DashboardView = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <RevenueProfitChart />
           <MarginTrendChart />
+          <WaterfallChart />
           <EfficiencyChart />
         </div>
       </section>
@@ -51,6 +54,7 @@ const DashboardView = () => {
           <ProfitabilityRatiosChart />
           <LeverageRatiosChart />
           <LiquidityRatiosChart />
+          <DuPontPanel />
         </div>
       </section>
 

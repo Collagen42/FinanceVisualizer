@@ -44,6 +44,8 @@ export interface FinancialRatios {
   assetTurnover: number | null;
   revenuePerEmployee: number | null;
   profitPerEmployee: number | null;
+  // DuPont
+  equityMultiplier: number | null;
 }
 
 export interface GrowthMetrics {
