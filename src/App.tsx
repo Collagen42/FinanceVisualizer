@@ -4,6 +4,7 @@ import { FileDropZone } from './components/upload/FileDropZone';
 import { ParsingStatus } from './components/upload/ParsingStatus';
 import DashboardView from './components/dashboard/DashboardView';
 import CompetitorOverviewTable from './components/competitor/CompetitorOverviewTable';
+import MarketShareSection from './components/competitor/MarketShareSection';
 
 const TABS = [
   { id: 'v1', label: 'Visualizer' },
@@ -55,7 +56,12 @@ function App() {
           <ParsingStatus />
         )}
         {dataset && activeTab === 'v1' && <DashboardView />}
-        {dataset && activeTab === 'v2' && <CompetitorOverviewTable />}
+        {dataset && activeTab === 'v2' && (
+          <div className="flex flex-col gap-4">
+            <CompetitorOverviewTable />
+            <MarketShareSection />
+          </div>
+        )}
       </main>
     </div>
   );
